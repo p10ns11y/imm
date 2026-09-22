@@ -1,6 +1,6 @@
 # imm
 
-independent module maintainer.
+independent module maintainer. Install only the whole source of direct dependencies. Every other use is an audited extract with a hash and the agent diff. Library authors ship those extracts with no node_modules.
 
 You install only the direct dependencies you named. Each install is the whole source of that package. You do not install the packages under it.
 
