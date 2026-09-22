@@ -9,6 +9,7 @@ import { ImmError } from "../src/errors.mjs";
 import { formatSlice, formatVerdict } from "../src/format.mjs";
 import { DEFAULT_POLICY, judgeUpdate } from "../src/policy.mjs";
 import { slicePackage } from "../src/slice.mjs";
+import { serve } from "../src/mcp.mjs";
 import { decideRetention, formatRetention } from "../src/store.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -43,6 +44,7 @@ function printUsage() {
     "imm verify --state <dir>",
     "imm store --module <file.json> [--audits <file.json>]",
     "imm agent [--module <file.json>] [--proposal <file.json>] [--package <dir> --version <x.y.z> --exports <a,b>] [--audits <file.json>] [--now <iso>]",
+    "imm mcp --registry <dir> --state <dir>",
     "imm demo",
   ].join("\n");
 }
@@ -50,6 +52,15 @@ function printUsage() {
 export async function main(argv) {
   const { cmd, opts } = parseArgs(argv);
   if (!cmd || cmd === "help" || opts.help) return { code: 0, text: printUsage() };
+
+  if (cmd === "mcp") {
+    await serve(process.stdin, process.stdout, {
+      registryDir: opts.registry,
+      stateDir: opts.state,
+      now: nowFrom(opts),
+    });
+    return { code: 0, text: null };
+  }
 
   if (cmd === "demo") {
     const text = await runDemo(root);
@@ -132,7 +143,7 @@ const isDirect = process.argv[1] && path.resolve(process.argv[1]) === fileURLToP
 if (isDirect) {
   main(process.argv.slice(2))
     .then(({ code, text }) => {
-      process.stdout.write(`${text}\n`);
+      if (text != null) process.stdout.write(`${text}\n`);
       process.exitCode = code;
     })
     .catch((error) => {
