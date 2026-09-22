@@ -2,6 +2,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { advise } from "../src/agent.mjs";
 import { runDemo } from "../src/demo.mjs";
 import { approvePlan, planInstall, verifyLock, writePlan } from "../src/ecosystem.mjs";
 import { ImmError } from "../src/errors.mjs";
@@ -41,6 +42,7 @@ function printUsage() {
     "imm approve --state <dir> --approver human|agent",
     "imm verify --state <dir>",
     "imm store --module <file.json> [--audits <file.json>]",
+    "imm agent [--module <file.json>] [--proposal <file.json>] [--package <dir> --version <x.y.z> --exports <a,b>] [--audits <file.json>] [--now <iso>]",
     "imm demo",
   ].join("\n");
 }
@@ -93,6 +95,27 @@ export async function main(argv) {
   if (cmd === "verify") {
     const check = verifyLock(opts.state);
     return { code: check.ok ? 0 : 2, text: check.ok ? "ok" : check.problems.join("\n") };
+  }
+
+  if (cmd === "agent") {
+    const proposal = opts.proposal ? JSON.parse(fs.readFileSync(opts.proposal, "utf8")) : undefined;
+    const mod = opts.module ? JSON.parse(fs.readFileSync(opts.module, "utf8")) : undefined;
+    const audits = opts.audits ? JSON.parse(fs.readFileSync(opts.audits, "utf8")) : {};
+    const slice = opts.package
+      ? slicePackage(
+          opts.package,
+          {
+            specifier: path.basename(opts.package),
+            version: opts.version,
+            exports: String(opts.exports ?? "").split(",").filter(Boolean),
+          },
+          { maxDepth: Number(opts.maxDepth ?? 6), maxFiles: 40, maxBytes: 200000, maxPackages: 8 },
+          DEFAULT_POLICY,
+          nowFrom(opts),
+        )
+      : undefined;
+    const advice = advise({ proposal, policy: DEFAULT_POLICY, now: nowFrom(opts), mod, audits, slice });
+    return { code: advice.ok ? 0 : 2, text: JSON.stringify(advice, null, 2) };
   }
 
   if (cmd === "store") {

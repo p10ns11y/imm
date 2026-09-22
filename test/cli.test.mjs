@@ -51,6 +51,15 @@ test("judge and approve exit 2 on a bad update and an agent approver", () => {
   assert.match(approve.stderr, /AGENT_APPROVER/);
 });
 
+test("agent installs a direct dependency as whole source and does not install subdependencies", () => {
+  const advice = run(["agent", "--module", path.join(root, "fixtures", "modules", "sharp.json")]);
+  assert.equal(advice.status, 0, advice.stderr);
+  const body = JSON.parse(advice.stdout);
+  assert.equal(body.verdict, "install-source");
+  assert.deepEqual(body.next, { do: "install-whole-source", target: "sharp@0.33.5" });
+  assert.ok(body.skip.includes("subdependencies"));
+});
+
 test("store holds a library that still wants node_modules and ships one that vendored the extract", () => {
   const held = run(["store", "--module", path.join(root, "fixtures", "modules", "slug-kit-install.json")]);
   assert.equal(held.status, 2);

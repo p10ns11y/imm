@@ -7,6 +7,7 @@ import { approvePlan, planInstall, verifyLock, writePlan } from "./ecosystem.mjs
 import { formatSlice, formatVerdict } from "./format.mjs";
 import { DEFAULT_POLICY, judgeUpdate } from "./policy.mjs";
 import { slicePackage } from "./slice.mjs";
+import { advise } from "./agent.mjs";
 import { decideRetention, formatRetention } from "./store.mjs";
 
 const NOW = new Date("2026-09-22T12:00:00.000Z");
@@ -82,15 +83,16 @@ export async function runDemo(root) {
   say(`  verify reads the vendor lock ${check.ok ? "ok" : check.problems.join(" ")}`);
 
   say("");
-  say("5. Publish, download, and install stop, except a hard matured direct dependency.");
-  const audits = { "color@4.2.3": { by: "human", at: "2026-08-01" } };
+  say("5. Install only the direct dependency, as whole source. Other uses stay extracts.");
   say(`  ${formatRetention(decideRetention({ name: "slugify", kind: "trivial" }, {}))}`);
   say(
-    `  ${formatRetention(decideRetention({ name: "sharp", kind: "direct", hard: true, matured: true, subdeps: ["color@4.2.3"] }, {}))}`,
+    `  ${formatRetention(decideRetention({ name: "sharp", kind: "direct", version: "0.33.5", subdeps: ["color@4.2.3"] }, {}))}`,
   );
   say(
-    `  ${formatRetention(decideRetention({ name: "sharp", kind: "direct", hard: true, matured: true, subdeps: ["color@4.2.3"] }, audits))}`,
+    `  ${formatRetention(decideRetention({ name: "color", kind: "use", version: "4.2.3", fn: "convert", hash: "sha256-abc", audit: { by: "agent", at: "2026-08-01" } }, {}))}`,
   );
+  const agentStep = advise({ mod: { name: "sharp", kind: "direct", version: "0.33.5" } });
+  say(`  agent next ${agentStep.next.do} ${agentStep.next.target}`);
   say("  Library authors ship that extract inside the package.");
   say(
     `  ${formatRetention(decideRetention({ name: "slug-kit", kind: "library", nodeModules: true, subdeps: ["slugify@1.0.0"], vendored: [] }, {}))}`,
