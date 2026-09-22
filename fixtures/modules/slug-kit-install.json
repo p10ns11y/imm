@@ -1,0 +1,7 @@
+{
+  "name": "slug-kit",
+  "kind": "library",
+  "nodeModules": true,
+  "subdeps": ["slugify@1.0.0"],
+  "vendored": []
+}

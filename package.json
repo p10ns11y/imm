@@ -1,0 +1,14 @@
+{
+  "name": "imm",
+  "private": true,
+  "type": "module",
+  "description": "independent module maintainer. Publish, download, and install stop, except a hard matured direct dependency. Library authors vendor the audited extract and ship no node_modules.",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "demo": "node bin/imm.mjs demo",
+    "test": "node --test"
+  },
+  "license": "MIT"
+}

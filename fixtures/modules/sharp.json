@@ -1,0 +1,8 @@
+{
+  "name": "sharp",
+  "kind": "direct",
+  "hard": true,
+  "matured": true,
+  "version": "0.33.5",
+  "subdeps": ["color@4.2.3"]
+}

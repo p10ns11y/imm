@@ -1,0 +1,8 @@
+{
+  "name": "fresh-util",
+  "kind": "direct",
+  "hard": true,
+  "matured": false,
+  "version": "0.1.0",
+  "subdeps": []
+}

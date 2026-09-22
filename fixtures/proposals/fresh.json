@@ -1,0 +1,10 @@
+{
+  "name": "fresh-slug",
+  "version": "9.9.9",
+  "range": "9.9.9",
+  "publishedAt": "2026-09-22T11:00:00.000Z",
+  "trust": "provenance",
+  "lifecycleScripts": false,
+  "integrity": "sha256-fresh",
+  "requestedBy": "agent"
+}

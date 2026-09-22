@@ -1,0 +1,10 @@
+{
+  "name": "pure-slug",
+  "version": "1.0.0",
+  "range": "^1.0.0",
+  "publishedAt": "2026-01-15T00:00:00.000Z",
+  "trust": "provenance",
+  "lifecycleScripts": false,
+  "integrity": "sha256-float",
+  "requestedBy": "agent"
+}

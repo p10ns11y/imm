@@ -1,0 +1,15 @@
+{
+  "needs": [
+    {
+      "specifier": "pure-slug",
+      "version": "1.0.0",
+      "exports": ["slugify"]
+    }
+  ],
+  "budgets": {
+    "maxPackages": 4,
+    "maxFiles": 20,
+    "maxBytes": 100000,
+    "maxDepth": 6
+  }
+}

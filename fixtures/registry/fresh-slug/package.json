@@ -1,0 +1,10 @@
+{
+  "name": "fresh-slug",
+  "version": "9.9.9",
+  "publishedAt": "2026-09-22T11:00:00.000Z",
+  "trust": "provenance",
+  "integrity": "sha256-fixture-fresh-slug",
+  "exports": {
+    ".": "./src/index.js"
+  }
+}

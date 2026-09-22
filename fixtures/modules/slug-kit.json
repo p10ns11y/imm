@@ -1,0 +1,13 @@
+{
+  "name": "slug-kit",
+  "kind": "library",
+  "nodeModules": false,
+  "subdeps": ["slugify@1.0.0"],
+  "vendored": [
+    {
+      "id": "slugify@1.0.0",
+      "files": ["vendor/slugify.js", "vendor/unicode.js"],
+      "audit": { "by": "author", "at": "2026-08-01" }
+    }
+  ]
+}

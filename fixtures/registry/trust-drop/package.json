@@ -1,0 +1,11 @@
+{
+  "name": "trust-drop",
+  "version": "2.0.0",
+  "publishedAt": "2026-01-15T00:00:00.000Z",
+  "trust": "none",
+  "previousTrust": "trusted-publisher",
+  "integrity": "sha256-fixture-trust-drop",
+  "exports": {
+    ".": "./src/index.js"
+  }
+}
