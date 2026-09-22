@@ -2,19 +2,29 @@ function idOf(mod) {
   return mod.version ? `${mod.name}@${mod.version}` : mod.name;
 }
 
-export function decideRetention(mod, audits = {}) {
-  if (mod.kind === "trivial") {
-    return {
-      name: mod.name,
-      action: "local",
-      reasons: ["no-publish", "no-download", "no-install"],
-    };
-  }
+function asAudit(record) {
+  if (!record) return null;
+  if (record.audit) return record.audit;
+  if (record.by || record.at) return record;
+  return null;
+}
 
-  if (mod.kind === "sub") {
-    const name = idOf(mod);
-    if (!audits[name]) return { name, action: "hold", reasons: ["needs-audit"] };
-    return { name, action: "store", reasons: ["audited"] };
+export function decideRetention(mod, audits = {}) {
+  if (mod.kind === "trivial" || mod.kind === "sub" || mod.kind === "use") {
+    const name = mod.fn ? `${idOf(mod)}#${mod.fn}` : idOf(mod);
+    const record = audits[name] ?? audits[idOf(mod)] ?? {};
+    const hash = mod.hash ?? record.hash;
+    const audit = mod.audit ?? asAudit(record);
+    const diff = mod.diff ?? record.diff;
+    const modified = Boolean(mod.agentModified ?? record.agentModified);
+    const reasons = [];
+    if (!hash) reasons.push("needs-hash");
+    if (!audit) reasons.push("needs-audit");
+    if (modified && !diff) reasons.push("needs-agent-diff");
+    if (reasons.length > 0) return { name, action: "hold", reasons };
+    const why = ["per-usage", "audited", "hash"];
+    if (diff) why.push("agent-diff");
+    return { name, action: "extract", reasons: why };
   }
 
   if (mod.kind === "library") {
@@ -42,25 +52,10 @@ export function decideRetention(mod, audits = {}) {
   }
 
   if (mod.kind === "direct") {
-    if (!mod.hard || !mod.matured) {
-      return {
-        name: mod.name,
-        action: "local",
-        reasons: ["not-hard-or-matured", "no-publish", "no-download", "no-install"],
-      };
-    }
-    const missing = (mod.subdeps ?? []).filter((dep) => !audits[dep]);
-    if (missing.length > 0) {
-      return {
-        name: mod.name,
-        action: "hold",
-        reasons: missing.map((dep) => `subdep-unaudited:${dep}`),
-      };
-    }
     return {
-      name: mod.name,
-      action: "store",
-      reasons: ["hard", "matured", "direct", "subdeps-audited"],
+      name: idOf(mod),
+      action: "install-source",
+      reasons: ["direct", "whole-source"],
     };
   }
 

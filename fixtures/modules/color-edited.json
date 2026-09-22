@@ -1,0 +1,9 @@
+{
+  "name": "color",
+  "kind": "use",
+  "version": "4.2.3",
+  "fn": "convert",
+  "hash": "sha256-abc",
+  "audit": { "by": "agent", "at": "2026-08-01" },
+  "agentModified": true
+}

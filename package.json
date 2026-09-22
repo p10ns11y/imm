@@ -2,7 +2,7 @@
   "name": "imm",
   "private": true,
   "type": "module",
-  "description": "independent module maintainer. Publish, download, and install stop, except a hard matured direct dependency. Library authors vendor the audited extract and ship no node_modules.",
+  "description": "independent module maintainer. Install only the whole source of direct dependencies. Every other use is an audited extract with a hash and the agent diff. Library authors ship those extracts with no node_modules.",
   "engines": {
     "node": ">=24"
   },

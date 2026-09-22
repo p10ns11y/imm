@@ -46,4 +46,4 @@ imm is the replacement for that package's ecosystem. npm, PyPI, crates, and the 
 
 Yarn Plug'n'Play and pnpm's content-addressable store still store whole packages. imm does not. The loop above is the product. Named exports, a reviewed file list, stubs that throw, and a second principal.
 
-This prototype has no network client and no loader that patches a language runtime. The fixtures are the loop, imported by file URL in tests. Where a hard matured direct dependency and its subdependencies are allowed to sit is ADR 0004. `import { z } from "zod"` names a facade, so the slice stays large, as ADR 0002 says. imm does not call that package trivial.
+This prototype has no network client and no loader that patches a language runtime. The fixtures are the loop, imported by file URL in tests. Which bytes are a whole-source install, and which are a per-usage extract, is ADR 0004. `import { z } from "zod"` names a facade, so the slice stays large, as ADR 0002 says. imm does not call that package trivial.

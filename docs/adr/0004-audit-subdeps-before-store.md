@@ -1,33 +1,35 @@
-# ADR 0004: Audit subdependencies before anything is stored
+# ADR 0004: Install direct source, extract every other use
 
 | Status | Accepted as the long run |
 | Date | 2026-09-22 |
 
 ## Context
 
-imm exists so a trivial module does not need a registry. The long run is stronger than that. Publish, download, and install drop out of the normal path. The remaining exception is a dependency the project names itself, that is hard to replace, and that has already matured.
+An earlier draft said publish, download, and install stop, except a hard matured direct dependency, and that its subdependencies are stored only after an audit. That mixed two different actions.
 
-A hard dependency is one you cannot honestly keep as a few functions in the repo. Image decoding, a crypto primitive, a runtime binding. A matured dependency is one you already trust enough to pin, not a release from this week. Direct means the project named it. Anything that dependency needs, and the project did not name, is a subdependency.
-
-Those subdependencies are how a small direct choice becomes a large unreviewed tree. imm does not store that tree because the direct dependency was allowed.
+The install is the direct dependency, and it is the whole source of that package. The packages and functions underneath it are not installed. Each use of that other code is its own record.
 
 ## Decision
 
-| Kind | Publish, download, install | On the machine |
-| --- | --- | --- |
-| Trivial module | Never. You maintain the source in the repo. | The repo copy only. |
-| Direct, but not both hard and matured | Never. Treat it as a trivial module. | The repo copy only. |
-| Subdependency | No install. An audit record comes first. | Stored only after the audit names that exact version. |
-| Direct, hard, and matured | This is the exception that still exists. | Stored only after every subdependency has an audit record. |
+| What the project named | What imm does |
+| --- | --- |
+| A direct dependency | Install the whole source of that package. Do not install its dependency tree. |
+| Any other use, including a subdependency or a single function | Keep an extract of the code that use needs. |
 
-An audit record names the subdependency version, who audited it, and when. The prototype reads that record. It does not perform the audit. Missing record means the bytes stay off the machine. The direct dependency waits with them.
+An extract has three records.
 
-`imm store` prints one of `local`, `hold`, or `store`. `hold` exits 2.
+- A hash of the original bytes.
+- An audit of that extract.
+- The diff, when an agent changed those bytes. No change means no diff. A change with no diff is incomplete.
+
+`imm store` prints `install-source` for a direct dependency. It prints `extract` for a complete per-usage record. It prints `hold` until the hash, the audit, or the agent diff is present. `hold` exits 2.
+
+Hard and matured are reasons you might name something as a direct dependency. They are not a second install rule. If the project named it, the whole source is the install.
 
 ## Consequences
 
-The registry stops being the place trivial code lives. It remains, for this exception, a source of hard matured direct dependencies and of the audited subdependency bytes those require. Library authors do this work inside the package they ship. ADR 0005.
+`node_modules` does not grow from subdependencies. Those uses sit in the repo as extracted functions, each pinned by hash, each audited, each carrying the agent's diff when the agent edited it.
 
-A subdependency audit is per version. A new version is a new audit. The release check in ADR 0001 still applies to anything that is allowed onto the machine.
+Library authors do the same inside the package they ship. ADR 0005.
 
-`import { z } from "zod"` is not made trivial by this rule. If the project names zod as a hard matured direct dependency, zod may be stored, and only after each subdependency zod needs has an audit. If the project does not need that, zod stays out and the few calls live in the repo.
+The release check in ADR 0001 still applies to a direct source install and to an extract that came from a registry. The prototype reads the records. It does not perform the audit, and it does not call a registry.

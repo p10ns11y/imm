@@ -11,27 +11,32 @@ function load(rel) {
   return JSON.parse(fs.readFileSync(path.join(root, rel), "utf8"));
 }
 
-test("a trivial module is never published, downloaded, or installed", () => {
+test("a trivial use is an extract, not an install, and it waits for a hash and an audit", () => {
   const decision = decideRetention(load("fixtures/modules/slugify.json"), {});
-  assert.equal(decision.action, "local");
-  assert.deepEqual(decision.reasons, ["no-publish", "no-download", "no-install"]);
+  assert.equal(decision.action, "hold");
+  assert.deepEqual(decision.reasons, ["needs-hash", "needs-audit"]);
 });
 
-test("a direct dependency stays off the machine until each subdependency is audited", () => {
-  const sharp = load("fixtures/modules/sharp.json");
-  const held = decideRetention(sharp, {});
-  assert.equal(held.action, "hold");
-  assert.deepEqual(held.reasons, ["subdep-unaudited:color@4.2.3"]);
+test("a direct dependency installs its whole source and does not install subdependencies", () => {
+  const sharp = decideRetention(load("fixtures/modules/sharp.json"), {});
+  assert.equal(sharp.action, "install-source");
+  assert.deepEqual(sharp.reasons, ["direct", "whole-source"]);
+  assert.equal(sharp.name, "sharp@0.33.5");
+});
 
-  const color = load("fixtures/modules/color.json");
-  assert.equal(decideRetention(color, {}).action, "hold");
-  assert.deepEqual(decideRetention(color, {}).reasons, ["needs-audit"]);
+test("a per-usage function keeps a hash, an audit, and the agent diff", () => {
+  const bare = decideRetention(load("fixtures/modules/color.json"), {});
+  assert.equal(bare.action, "hold");
+  assert.deepEqual(bare.reasons, ["needs-hash", "needs-audit"]);
 
-  const audits = load("fixtures/audits/color.json");
-  assert.equal(decideRetention(color, audits).action, "store");
-  const stored = decideRetention(sharp, audits);
-  assert.equal(stored.action, "store");
-  assert.deepEqual(stored.reasons, ["hard", "matured", "direct", "subdeps-audited"]);
+  const edited = decideRetention(load("fixtures/modules/color-edited.json"), {});
+  assert.equal(edited.action, "hold");
+  assert.deepEqual(edited.reasons, ["needs-agent-diff"]);
+
+  const used = decideRetention(load("fixtures/modules/color-use.json"), {});
+  assert.equal(used.action, "extract");
+  assert.equal(used.name, "color@4.2.3#convert");
+  assert.deepEqual(used.reasons, ["per-usage", "audited", "hash", "agent-diff"]);
 });
 
 test("a library ships audited extracted source and does not ask for node_modules", () => {
@@ -44,8 +49,8 @@ test("a library ships audited extracted source and does not ask for node_modules
   assert.deepEqual(shipped.reasons, ["vendored", "audited", "extracted", "no-node-modules"]);
 });
 
-test("a direct dependency that is not matured is maintained locally", () => {
+test("every direct dependency installs as whole source", () => {
   const decision = decideRetention(load("fixtures/modules/fresh-util.json"), {});
-  assert.equal(decision.action, "local");
-  assert.ok(decision.reasons.includes("not-hard-or-matured"));
+  assert.equal(decision.action, "install-source");
+  assert.deepEqual(decision.reasons, ["direct", "whole-source"]);
 });
