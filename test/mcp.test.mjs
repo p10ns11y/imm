@@ -62,7 +62,7 @@ test("MCP lists the four tools and install returns whole source", async () => {
   const listed = handleMessage({ jsonrpc: "2.0", id: 1, method: "tools/list" }, ctx);
   assert.deepEqual(
     listed.result.tools.map((tool) => tool.name),
-    ["imm_install", "imm_extract", "imm_audit", "imm_overwrite"],
+    ["imm_install", "imm_extract", "imm_audit", "imm_sandbox", "imm_overwrite"],
   );
   const called = handleMessage(
     {
@@ -117,5 +117,5 @@ test("stdio server answers initialize and tools/list", async () => {
   await ready;
   child.kill();
   assert.equal(messages[0].result.serverInfo.name, "imm");
-  assert.equal(messages[1].result.tools.length, 4);
+  assert.equal(messages[1].result.tools.length, 5);
 });

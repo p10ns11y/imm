@@ -10,6 +10,7 @@ import { formatSlice, formatVerdict } from "../src/format.mjs";
 import { DEFAULT_POLICY, judgeUpdate } from "../src/policy.mjs";
 import { slicePackage } from "../src/slice.mjs";
 import { serve } from "../src/mcp.mjs";
+import { bringSources, lockInstall } from "../src/sandbox.mjs";
 import { decideRetention, formatRetention } from "../src/store.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -44,6 +45,7 @@ function printUsage() {
     "imm verify --state <dir>",
     "imm store --module <file.json> [--audits <file.json>]",
     "imm agent [--module <file.json>] [--proposal <file.json>] [--package <dir> --version <x.y.z> --exports <a,b>] [--audits <file.json>] [--now <iso>]",
+    "imm sandbox --package <dir> --version <x.y.z> --exports <name> --state <dir>",
     "imm mcp --registry <dir> --state <dir>",
     "imm demo",
   ].join("\n");
@@ -127,6 +129,26 @@ export async function main(argv) {
       : undefined;
     const advice = advise({ proposal, policy: DEFAULT_POLICY, now: nowFrom(opts), mod, audits, slice });
     return { code: advice.ok ? 0 : 2, text: JSON.stringify(advice, null, 2) };
+  }
+
+  if (cmd === "sandbox") {
+    const name = path.basename(opts.package);
+    const fn = String(opts.exports ?? "").split(",").filter(Boolean)[0];
+    const locked = lockInstall({
+      name,
+      version: opts.version,
+      registryDir: path.dirname(path.resolve(opts.package)),
+      stateDir: opts.state,
+    });
+    if (!locked.ok) return { code: 2, text: JSON.stringify(locked) };
+    const brought = bringSources({
+      name,
+      version: opts.version,
+      fn,
+      stateDir: opts.state,
+      now: nowFrom(opts),
+    });
+    return { code: brought.ok ? 0 : 2, text: JSON.stringify({ locked, brought }) };
   }
 
   if (cmd === "store") {

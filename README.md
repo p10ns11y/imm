@@ -10,6 +10,8 @@ This is the package ecosystem [Peramanathan described on 21 May 2026](https://x.
 
 The release check still runs, unused files stay out, and a human approves the bytes before they land. The prototype runs the loop on local fixtures and does not call a live registry yet.
 
+One intermediate step still uses a regular install. That install is locked in a sandbox: it cannot read the host, and it cannot execute anything on the host. The agent then works like a bundler. It copies out only the sources the use reaches, and leaves the rest inside the lock. esbuild, Rollup, or webpack can do that copy later. `imm sandbox` is the same contract without running the package.
+
 Decisions, each with a command:
 
 | Approach | ADR | Command |
@@ -21,6 +23,7 @@ Decisions, each with a command:
 | Library authors put that audited extract in the package. The package does not ask for `node_modules`. | [0005](docs/adr/0005-authors-vendor-audited-code.md) | `store` |
 | The agent judges one next maintenance step. | [0006](docs/adr/0006-agents-judge-the-next-step.md) | `agent` |
 | Agents install, extract, audit, and overwrite over MCP. | [0007](docs/adr/0007-mcp-for-agents.md) | `mcp` |
+| A regular install stays locked in a sandbox. A bundler-style pass brings out only the reached sources. | [0008](docs/adr/0008-locked-install-then-bundle.md) | `sandbox` |
 
 No network. No dependencies. The registry is `fixtures/registry/`. Nothing in plan imports package code.
 

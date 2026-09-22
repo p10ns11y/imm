@@ -1,4 +1,5 @@
 import { auditUse, extractUse, installSource, overwriteUse } from "./ops.mjs";
+import { bringSources, lockInstall } from "./sandbox.mjs";
 
 export const SERVER_INFO = { name: "imm", version: "0.1.0" };
 
@@ -42,6 +43,20 @@ export const TOOLS = [
     },
   },
   {
+    name: "imm_sandbox",
+    description:
+      "Lock a regular install in a sandbox, then copy out only the sources one function reaches. The sandbox cannot read or execute on the host.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        name: { type: "string" },
+        version: { type: "string" },
+        fn: { type: "string" },
+      },
+      required: ["name", "version", "fn"],
+    },
+  },
+  {
     name: "imm_overwrite",
     description: "Overwrite an extract with agent-modified source and store the diff against the original hash.",
     inputSchema: {
@@ -71,6 +86,11 @@ export function callTool(name, args, ctx) {
   }
   if (name === "imm_audit") {
     return toolText(auditUse({ ...args, stateDir: ctx.stateDir }));
+  }
+  if (name === "imm_sandbox") {
+    const locked = lockInstall({ ...args, registryDir: ctx.registryDir, stateDir: ctx.stateDir });
+    if (!locked.ok) return toolText(locked);
+    return toolText(bringSources({ ...args, stateDir: ctx.stateDir, now: ctx.now }));
   }
   if (name === "imm_overwrite") {
     return toolText(overwriteUse({ ...args, stateDir: ctx.stateDir }));
