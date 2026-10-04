@@ -10,6 +10,10 @@ Keep every other use as an extract. The extract is the function you call, a hash
 
 A regular install can come first. `imm` copies it into a lock and does not run it. The agent then copies out only the files that use reaches.
 
+## Aim
+
+imm becomes the universal installer and maintainer of the bytes a deployable project needs. The unit is bits, not a language. A module may be a binary, a source file, or any other blob. imm pulls it, audits it, and then keeps, adds, or tweaks only the bytes that the deployable project reaches. Everything else stays out. v1 is the fixture slice of that aim: one record, a release check, and no execution of the package.
+
 ## Try it
 
 ```bash
