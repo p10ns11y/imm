@@ -1,5 +1,7 @@
 # Approach and engineering
 
+v1 is the Rust program (`cargo test`, `cargo run --quiet --`). This note describes the Node prototype that v1 replaced. The record split below is not the v1 shape. v1 keeps one record in `src/records.rs`.
+
 The approach is the right product. The code is a decision table with three writers, and the sandbox claim is stronger than what the code enforces.
 
 This note is an explanation of that judgment. It is not a procedure. Commands and records live in the README and the ADRs.

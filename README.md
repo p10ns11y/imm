@@ -12,12 +12,12 @@ A regular install can come first. `imm` copies it into a lock and does not run i
 
 ## Try it
 
-You need Node 24 or newer.
-
 ```bash
-node bin/imm.mjs demo
-node --test
+cargo test
+cargo run --quiet -- package-flow
 ```
+
+The binary does not run package code. A direct install is a copy that has already passed the release check. A use is one record: the reached files, a hash, an audit, and a diff when a human changed the bytes. `approve --approver agent` exits 2.
 
 The sample registry is `fixtures/registry/`. These commands do not use the network.
 
